@@ -54,14 +54,14 @@ A possible later capability is to download the selected add-ons and build a sing
 
 ## Local MySQL data model
 
-The initial schema is in [database/schema.sql](database/schema.sql), with relationship notes in [database/README.md](database/README.md). It is designed for MySQL 8.0+ and creates only a local `bedrock_experience_maker` database when imported.
+The MVP schema is in [database/schema.sql](database/schema.sql), with brief relationship notes in [database/README.md](database/README.md). It is designed for MySQL 8.0+ and creates only a local `bedrock_experience_maker` database when imported.
 
-The three inspected `.mcaddon` files demonstrate why the catalog separates an **add-on release** from its contained **manifest packs**. Each archive contains resource and behavior packs, and the behavior packs declare dependencies on resource-pack UUIDs and built-in script modules. Auto Miner also has an archive label of `1.0.2` while its behavior-pack header is `1.0.1`.
+It has three tables: a manually curated `addons` catalog, `experience_packs`, and the ordered join table `experience_pack_addons`. Source URLs, a current version, a Bedrock-version note, and raw manifest data are optional add-on metadata; no versions, manifest data, or compatibility records are required to browse add-ons or build a pack.
 
-All primary keys are application-generated UUIDs owned by this application. Manifest header UUIDs and module UUIDs are stored as indexed metadata, never as unique keys: they are useful for dependency matching but cannot be trusted as globally unique creator identifiers. Manifest JSON is retained alongside normalized modules, dependencies, capabilities, and an optional file inventory so the model remains forward-compatible and can later support conflict detection.
+All primary keys are application-generated UUIDs. Creator-defined manifest UUIDs can be retained in raw manifest data but are never used to identify catalog records or enforce uniqueness.
 
 ### Availability and Bedrock-version policy
 
-The catalog treats provider availability as a current observation, not a promise that every historical release can still be downloaded. A creator may expose only the latest artifact; therefore an unavailable historical source remains in a published plan for context, but must display an availability warning and offer the current project page where possible.
+The catalog assumes a provider may expose only the newest artifact. It records an optional current version and always links to the provider page; historical-release tracking can be added later if it becomes useful.
 
-Minecraft version tags, manifest minimum-engine versions, and testing reports are compatibility evidence—not hard validation rules. Since players normally install the current Bedrock release, a mismatch should be surfaced with its source and severity, while still allowing the creator to include the add-on. Experience-pack revisions may record an intended Bedrock version so the app can produce useful warnings.
+Minecraft version tags and manifest minimum-engine versions are optional notes. Since players normally install the current Bedrock release, a mismatch should be displayed as a warning, never used to prevent adding an add-on to a pack.
