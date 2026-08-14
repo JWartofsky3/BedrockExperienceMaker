@@ -28,6 +28,41 @@ service AddonService {
   }
 }
 
+service ExperiencePackService {
+  rpc ListExperiencePacks(ListExperiencePacksRequest) returns (ListExperiencePacksResponse) {
+    option (google.api.http) = {get: "/v1/packs"};
+    option (google.api.method_signature) = "";
+  }
+
+  rpc GetExperiencePack(GetExperiencePackRequest) returns (ExperiencePack) {
+    option (google.api.http) = {get: "/v1/{name=packs/*}"};
+    option (google.api.method_signature) = "name";
+  }
+
+  rpc CreateExperiencePack(CreateExperiencePackRequest) returns (ExperiencePack) {
+    option (google.api.http) = {post: "/v1/packs" body: "experience_pack"};
+    option (google.api.method_signature) = "experience_pack";
+  }
+
+  rpc DeleteExperiencePack(DeleteExperiencePackRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {delete: "/v1/{name=packs/*}"};
+    option (google.api.method_signature) = "name";
+  }
+
+  rpc AddExperiencePackAddon(AddExperiencePackAddonRequest) returns (ExperiencePack) {
+    option (google.api.http) = {post: "/v1/{name=packs/*}:addAddon" body: "*"};
+  }
+
+  rpc RemoveExperiencePackAddon(RemoveExperiencePackAddonRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {delete: "/v1/{name=packs/*}/addons/{addon_name=addons/*}"};
+    option (google.api.method_signature) = "name,addon_name";
+  }
+
+  rpc ReorderExperiencePackAddons(ReorderExperiencePackAddonsRequest) returns (ExperiencePack) {
+    option (google.api.http) = {post: "/v1/{name=packs/*}:reorderAddons" body: "*"};
+  }
+}
+
 message ListAddonsRequest {
   // The maximum number of add-ons to return. The server returns at most 100.
   // If unspecified, at most 50 add-ons are returned.
@@ -59,4 +94,63 @@ message DeleteAddonRequest {
     (google.api.field_behavior) = REQUIRED,
     (google.api.resource_reference) = {type: "bedrockexperiencemaker.local/Addon"}
   ];
+}
+
+message ListExperiencePacksRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListExperiencePacksResponse {
+  repeated ExperiencePack experience_packs = 1;
+  string next_page_token = 2;
+}
+
+message GetExperiencePackRequest {
+  string name = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "bedrockexperiencemaker.local/ExperiencePack"}
+  ];
+}
+
+message CreateExperiencePackRequest {
+  ExperiencePack experience_pack = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message DeleteExperiencePackRequest {
+  string name = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "bedrockexperiencemaker.local/ExperiencePack"}
+  ];
+}
+
+message AddExperiencePackAddonRequest {
+  string name = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "bedrockexperiencemaker.local/ExperiencePack"}
+  ];
+  string addon_name = 2 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "bedrockexperiencemaker.local/Addon"}
+  ];
+  string note = 3;
+}
+
+message RemoveExperiencePackAddonRequest {
+  string name = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "bedrockexperiencemaker.local/ExperiencePack"}
+  ];
+  string addon_name = 2 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "bedrockexperiencemaker.local/Addon"}
+  ];
+}
+
+message ReorderExperiencePackAddonsRequest {
+  string name = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "bedrockexperiencemaker.local/ExperiencePack"}
+  ];
+  repeated string addon_names = 2 [(google.api.resource_reference) = {type: "bedrockexperiencemaker.local/Addon"}];
 }

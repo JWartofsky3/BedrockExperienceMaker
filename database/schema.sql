@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS experience_packs (
   id CHAR(36) NOT NULL,
   slug VARCHAR(160) NOT NULL,
   name VARCHAR(255) NOT NULL,
+  creator_name VARCHAR(160) NULL,
   description TEXT NULL,
   setup_notes TEXT NULL,
   icon_path VARCHAR(1024) NULL,
@@ -52,6 +53,22 @@ CREATE TABLE IF NOT EXISTS experience_packs (
   PRIMARY KEY (id),
   UNIQUE KEY uq_experience_packs_slug (slug)
 ) ENGINE=InnoDB;
+
+SET @creator_name_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.columns
+  WHERE table_schema = 'bedrock_experience_maker'
+    AND table_name = 'experience_packs'
+    AND column_name = 'creator_name'
+);
+SET @creator_name_migration := IF(
+  @creator_name_exists = 0,
+  'ALTER TABLE experience_packs ADD COLUMN creator_name VARCHAR(160) NULL AFTER name',
+  'SELECT 1'
+);
+PREPARE creator_name_statement FROM @creator_name_migration;
+EXECUTE creator_name_statement;
+DEALLOCATE PREPARE creator_name_statement;
 
 -- `install_order` is explicit: 1 is the first add-on shown in the installation
 -- checklist. It is not a compatibility rule and does not block a selection.

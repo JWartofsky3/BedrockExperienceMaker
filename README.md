@@ -56,7 +56,7 @@ A possible later capability is to download the selected add-ons and build a sing
 
 The MVP schema is in [database/schema.sql](database/schema.sql), with brief relationship notes in [database/README.md](database/README.md). It is designed for MySQL 8.0+ and creates only a local `bedrock_experience_maker` database when imported.
 
-It has three tables: a manually curated `addons` catalog, `experience_packs`, and the ordered join table `experience_pack_addons`. Source URLs, a current version, a Bedrock-version note, and raw manifest data are optional add-on metadata; no versions, manifest data, or compatibility records are required to browse add-ons or build a pack. Add-on IDs are stable, application-owned resource identifiers used directly in `addons/{id}`; they do not need to be UUIDs.
+It has four tables: a manually curated `addons` catalog, `addon_dependencies`, `experience_packs`, and the ordered join table `experience_pack_addons`. Packs use a local `creator_name` field for display; it is not authentication or authorization. Source URLs, a current version, a Bedrock-version note, and raw manifest data are optional add-on metadata; no versions, manifest data, or compatibility records are required to browse add-ons or build a pack. Add-on IDs are stable, application-owned resource identifiers used directly in `addons/{id}`; they do not need to be UUIDs.
 
 Creator-defined manifest UUIDs can be retained in raw manifest data but are never used to identify catalog records or enforce uniqueness.
 
@@ -68,10 +68,11 @@ Minecraft version tags and manifest minimum-engine versions are optional notes. 
 
 ## Run the add-on catalog
 
-1. Configure the local MySQL Windows service as `MySQL`, start it with `npm run db:start`, then import `database/schema.sql` and `database/seed_addons.sql`.
-2. Set `MYSQL_DSN` (use `api/.env.example` as the template) and run `npm run backend` from the repository root.
-3. Run `npm run dev` from the repository root and open the URL Vite prints, normally `http://localhost:5173`.
+1. Configure the local MySQL Windows service as `MySQL`.
+2. Run `npm run seed` from the repository root. It prompts for the local MySQL root password, then applies the schema, seed catalog, example experience, and local API account.
+3. Run `npm run backend` from the repository root.
+4. Run `npm run dev` from the repository root and open the URL Vite prints, normally `http://localhost:5173`.
 
 The Vite dev server proxies `GET /v1/addons` to the API at `http://127.0.0.1:8080`. The add-on page renders only the records returned by MySQL and shows an error if the API is unavailable.
 
-On Windows, `npm run full` starts the `MySQL` service, opens the API in a second Command Prompt window, and starts Vite in the current terminal. Close both terminal windows to stop the app.
+`npm run full` starts MySQL, applies the local seed data, opens the API in a second Command Prompt window, and starts Vite in the current terminal. It prompts for the MySQL root password each time so that the seed data is refreshed. Close both terminal windows to stop the app.

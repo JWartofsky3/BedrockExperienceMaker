@@ -66,3 +66,25 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO addon_dependencies (addon_id, dependency_id)
 VALUES ('cocoas-structures', 'cocoas-monsters')
 ON DUPLICATE KEY UPDATE dependency_id = VALUES(dependency_id);
+
+INSERT INTO experience_packs (id, slug, name, creator_name, description, setup_notes)
+VALUES (
+  'b2f3a0ca-8b33-4e01-935e-1d0dd410e8d9',
+  'cocoas-world-adventure',
+  'Cocoa''s World Adventure',
+  'CocoaWarrior',
+  'A world-focused experience with Cocoa''s creatures, structures, and birds.',
+  'Install Cocoa''s Monsters before Cocoa''s Structures, then activate each selected behavior and resource pack in the world settings.'
+)
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  creator_name = VALUES(creator_name),
+  description = VALUES(description),
+  setup_notes = VALUES(setup_notes);
+
+INSERT INTO experience_pack_addons (id, experience_pack_id, addon_id, install_order)
+VALUES
+  ('ecef74ca-399a-40f1-8eef-9e03d3a5c0d1', 'b2f3a0ca-8b33-4e01-935e-1d0dd410e8d9', 'cocoas-monsters', 1),
+  ('64e59d6b-fb5e-4c22-9a41-2d61c0d65291', 'b2f3a0ca-8b33-4e01-935e-1d0dd410e8d9', 'cocoas-structures', 2),
+  ('be0ba8a5-07ac-4e87-8a6a-ac6a623b6161', 'b2f3a0ca-8b33-4e01-935e-1d0dd410e8d9', 'cocoas-birds', 3)
+ON DUPLICATE KEY UPDATE install_order = VALUES(install_order);
