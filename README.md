@@ -51,3 +51,11 @@ A possible later capability is to download the selected add-ons and build a sing
 - The exporter would need to handle behavior-pack and resource-pack files separately, preserve or intentionally reconcile manifest dependencies, and report every overridden file.
 - A combined archive does not automatically make the packs compatible or activate them within a Minecraft world; the generated instructions still need to explain required world activation and experiments.
 - Before implementation, we must confirm author permissions and provider terms. Downloading and repackaging third-party add-ons may be prohibited even if a direct download is technically possible.
+
+## Local MySQL data model
+
+The initial schema is in [database/schema.sql](database/schema.sql), with relationship notes in [database/README.md](database/README.md). It is designed for MySQL 8.0+ and creates only a local `bedrock_experience_maker` database when imported.
+
+The three inspected `.mcaddon` files demonstrate why the catalog separates an **add-on release** from its contained **manifest packs**. Each archive contains resource and behavior packs, and the behavior packs declare dependencies on resource-pack UUIDs and built-in script modules. Auto Miner also has an archive label of `1.0.2` while its behavior-pack header is `1.0.1`.
+
+All primary keys are application-generated UUIDs owned by this application. Manifest header UUIDs and module UUIDs are stored as indexed metadata, never as unique keys: they are useful for dependency matching but cannot be trusted as globally unique creator identifiers. Manifest JSON is retained alongside normalized modules, dependencies, capabilities, and an optional file inventory so the model remains forward-compatible and can later support conflict detection.
