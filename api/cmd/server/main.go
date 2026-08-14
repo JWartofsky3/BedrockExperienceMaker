@@ -10,6 +10,8 @@ import (
 	"time"
 
 	addonoperations "github.com/JWartofsky3/BedrockExperienceMaker/api/cmd/server/addons/operations"
+	"github.com/JWartofsky3/BedrockExperienceMaker/api/cmd/server/auth"
+	authoperations "github.com/JWartofsky3/BedrockExperienceMaker/api/cmd/server/auth/operations"
 	packoperations "github.com/JWartofsky3/BedrockExperienceMaker/api/cmd/server/packs/operations"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -35,6 +37,9 @@ func main() {
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	})
+	mux.HandleFunc("POST /v1/auth/login", authoperations.Login(db))
+	mux.HandleFunc("POST /v1/auth/logout", authoperations.Logout(db))
+	mux.HandleFunc("GET /v1/auth/me", authoperations.GetCurrentUser(db))
 	mux.HandleFunc("GET /v1/addons", addonoperations.ListAddons(db))
 	mux.HandleFunc("GET /v1/addons/{name}", addonoperations.GetAddon(db))
 	mux.HandleFunc("DELETE /v1/addons/{name}", addonoperations.DeleteAddon(db))
@@ -49,5 +54,5 @@ func main() {
 		address = "127.0.0.1:8080"
 	}
 	log.Printf("Add-on API listening on http://%s", address)
-	log.Fatal(http.ListenAndServe(address, mux))
+	log.Fatal(http.ListenAndServe(address, auth.Middleware(db, mux)))
 }

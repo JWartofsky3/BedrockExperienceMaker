@@ -46,6 +46,10 @@ func ListAddons(db *sql.DB) http.HandlerFunc {
 				addons.WriteJSONError(w, "could not read add-ons", http.StatusInternalServerError)
 				return
 			}
+			if err := addons.PopulateDependencies(r.Context(), db, &item); err != nil {
+				addons.WriteJSONError(w, "could not load add-on dependencies", http.StatusInternalServerError)
+				return
+			}
 			items = append(items, item)
 		}
 		if err := rows.Err(); err != nil {
@@ -54,7 +58,7 @@ func ListAddons(db *sql.DB) http.HandlerFunc {
 		}
 		response := struct {
 			Addons        []addons.Addon `json:"addons"`
-			NextPageToken string  `json:"nextPageToken,omitempty"`
+			NextPageToken string         `json:"nextPageToken,omitempty"`
 		}{Addons: items}
 		if hasNextPage {
 			response.NextPageToken = encodePageToken(offset + pageSize)

@@ -20,6 +20,10 @@ func GetAddon(db *sql.DB) http.HandlerFunc {
 			addons.WriteJSONError(w, "could not load add-on", http.StatusInternalServerError)
 			return
 		}
+		if err := addons.PopulateDependencies(r.Context(), db, &item); err != nil {
+			addons.WriteJSONError(w, "could not load add-on dependencies", http.StatusInternalServerError)
+			return
+		}
 		addons.WriteJSON(w, item, http.StatusOK)
 	}
 }

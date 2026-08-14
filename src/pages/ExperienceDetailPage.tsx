@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getPack, type ExperiencePack } from '../api'
+import { downloadPack, getPack, type ExperiencePack } from '../api'
 import Layout from '../components/Layout'
 
 export default function ExperienceDetailPage() {
@@ -13,7 +13,7 @@ export default function ExperienceDetailPage() {
   return <Layout><section className="mx-auto max-w-5xl px-6 py-12">
     <Link className="text-sm text-emerald-400" to="/experiences">← All experiences</Link>
     {error && <p className="mt-5 rounded-lg bg-red-400/10 p-4 text-red-100">{error}</p>}
-    {pack && <><p className="mt-6 text-sm text-emerald-400">Created by {pack.creatorName}</p><h1 className="mt-2 text-3xl font-bold">{pack.displayName}</h1>
+    {pack && <><div className="mt-6 flex items-start justify-between gap-6"><div><p className="text-sm text-emerald-400">Created by {pack.creatorName}</p><h1 className="mt-2 text-3xl font-bold">{pack.displayName}</h1></div><button onClick={() => downloadPack(pack)} className="rounded border border-emerald-400/50 px-3 py-2 text-sm text-emerald-300 hover:bg-emerald-400/10">Download JSON</button></div>
       {pack.description && <p className="mt-4 max-w-3xl text-slate-300">{pack.description}</p>}
       {pack.setupNotes && <section className="mt-8 rounded-xl border border-amber-400/30 bg-amber-400/10 p-5"><h2 className="font-semibold text-amber-100">Setup notes</h2><p className="mt-2 text-sm leading-6 text-amber-50">{pack.setupNotes}</p></section>}
       <section className="mt-10"><h2 className="text-2xl font-semibold">Installed add-ons</h2><p className="mt-2 text-sm text-slate-400">Install them in this order.</p>

@@ -28,6 +28,20 @@ service AddonService {
   }
 }
 
+service AuthService {
+  rpc Login(LoginRequest) returns (User) {
+    option (google.api.http) = {post: "/v1/auth/login" body: "*"};
+  }
+
+  rpc Logout(LogoutRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {post: "/v1/auth/logout" body: "*"};
+  }
+
+  rpc GetCurrentUser(GetCurrentUserRequest) returns (User) {
+    option (google.api.http) = {get: "/v1/auth/me"};
+  }
+}
+
 service ExperiencePackService {
   rpc ListExperiencePacks(ListExperiencePacksRequest) returns (ListExperiencePacksResponse) {
     option (google.api.http) = {get: "/v1/packs"};
@@ -95,6 +109,15 @@ message DeleteAddonRequest {
     (google.api.resource_reference) = {type: "bedrockexperiencemaker.local/Addon"}
   ];
 }
+
+message LoginRequest {
+  string username = 1 [(google.api.field_behavior) = REQUIRED];
+  string password = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message LogoutRequest {}
+
+message GetCurrentUserRequest {}
 
 message ListExperiencePacksRequest {
   int32 page_size = 1;

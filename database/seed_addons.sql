@@ -51,6 +51,18 @@ INSERT INTO addons (
   NULL,
   NULL,
   JSON_OBJECT('dependencies', JSON_ARRAY('addons/cocoas-monsters'))
+),
+(
+  'treecapitators',
+  'Treecapitators',
+  'CocoaWarrior',
+  'Adds Treecapitator tools that cut trees faster.',
+  'https://media.forgecdn.net/avatars/thumbnails/1195/393/256/256/638770982001723258.png',
+  NULL,
+  NULL,
+  '1.0.1',
+  'Manifest minimum engine version: 1.21.30.',
+  JSON_OBJECT('packs', JSON_ARRAY('behavior', 'resource'), 'script_modules', JSON_ARRAY('@minecraft/server'))
 )
 ON DUPLICATE KEY UPDATE
   display_name = VALUES(display_name),
@@ -81,6 +93,11 @@ ON DUPLICATE KEY UPDATE
   creator_name = VALUES(creator_name),
   description = VALUES(description),
   setup_notes = VALUES(setup_notes);
+
+-- Reset only the example pack's entries so its fixed seed order can be
+-- re-applied without colliding with an order changed during local testing.
+DELETE FROM experience_pack_addons
+WHERE experience_pack_id = 'b2f3a0ca-8b33-4e01-935e-1d0dd410e8d9';
 
 INSERT INTO experience_pack_addons (id, experience_pack_id, addon_id, install_order)
 VALUES

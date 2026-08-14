@@ -27,6 +27,12 @@ message Addon {
   google.protobuf.Struct manifest_data = 10;
   google.protobuf.Timestamp create_time = 11 [(google.api.field_behavior) = OUTPUT_ONLY];
   google.protobuf.Timestamp update_time = 12 [(google.api.field_behavior) = OUTPUT_ONLY];
+  repeated AddonDependency dependencies = 13 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+message AddonDependency {
+  string name = 1 [(google.api.resource_reference) = {type: "bedrockexperiencemaker.local/Addon"}];
+  string display_name = 2 [(google.api.field_behavior) = OUTPUT_ONLY];
 }
 
 message ExperiencePack {
@@ -37,12 +43,22 @@ message ExperiencePack {
 
   string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
   string display_name = 2 [(google.api.field_behavior) = REQUIRED];
-  string creator_name = 3 [(google.api.field_behavior) = REQUIRED];
+  string creator_name = 3 [(google.api.field_behavior) = OUTPUT_ONLY];
   string description = 4;
   string setup_notes = 5;
   repeated PackAddon addons = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
   google.protobuf.Timestamp create_time = 7 [(google.api.field_behavior) = OUTPUT_ONLY];
   google.protobuf.Timestamp update_time = 8 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+message User {
+  option (google.api.resource) = {
+    type: "bedrockexperiencemaker.local/User"
+    pattern: "users/{user}"
+  };
+
+  string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+  string username = 2 [(google.api.field_behavior) = OUTPUT_ONLY];
 }
 
 message PackAddon {

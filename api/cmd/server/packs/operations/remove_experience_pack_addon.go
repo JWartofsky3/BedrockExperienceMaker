@@ -11,6 +11,9 @@ func RemoveExperiencePackAddon(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		packID := r.PathValue("name")
 		addonID := r.PathValue("addon")
+		if !authorizeCreator(w, r, db, packID) {
+			return
+		}
 		if _, err := packs.Get(r.Context(), db, packID, false); packs.NotFound(err) {
 			packs.WriteJSONError(w, "pack not found", http.StatusNotFound)
 			return

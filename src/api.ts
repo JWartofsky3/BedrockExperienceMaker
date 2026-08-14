@@ -8,6 +8,12 @@ export type Addon = {
   mcpedlUrl?: string
   currentVersion?: string
   minecraftVersionNote?: string
+  dependencies?: AddonDependency[]
+}
+
+export type AddonDependency = {
+  name: string
+  displayName: string
 }
 
 export type PackAddon = {
@@ -20,6 +26,7 @@ export type ExperiencePack = {
   name: string
   displayName: string
   creatorName: string
+  creatorUserId?: string
   description?: string
   setupNotes?: string
   addons?: PackAddon[]
@@ -27,6 +34,7 @@ export type ExperiencePack = {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}${path}`, {
+    credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
   })
@@ -50,7 +58,35 @@ export function getPack(id: string) {
   return request<ExperiencePack>(`/v1/packs/${id}`)
 }
 
-export function createPack(pack: Omit<ExperiencePack, 'name' | 'addons'>) {
+export function downloadPack(pack: ExperiencePack) {
+  const fileName = `${pack.displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'experience-pack'}.json`
+  const content = JSON.stringify({ ...pack, addons: pack.addons ?? [] }, null, 2)
+  const url = URL.createObjectURL(new Blob([content], { type: 'application/json' }))
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+export type User = {
+  name: string
+  username: string
+}
+
+export function getCurrentUser() {
+  return request<User>('/v1/auth/me')
+}
+
+export function login(username: string, password: string) {
+  return request<User>('/v1/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) })
+}
+
+export function logout() {
+  return request<void>('/v1/auth/logout', { method: 'POST' })
+}
+
+export function createPack(pack: Pick<ExperiencePack, 'displayName' | 'description' | 'setupNotes'>) {
   return request<ExperiencePack>('/v1/packs', { method: 'POST', body: JSON.stringify(pack) })
 }
 

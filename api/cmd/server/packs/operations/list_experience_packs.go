@@ -57,7 +57,7 @@ func ListExperiencePacks(db *sql.DB) http.HandlerFunc {
 		}
 		packs.WriteJSON(w, struct {
 			ExperiencePacks []packs.ExperiencePack `json:"experiencePacks"`
-			NextPageToken  string                 `json:"nextPageToken,omitempty"`
+			NextPageToken   string                 `json:"nextPageToken,omitempty"`
 		}{ExperiencePacks: items, NextPageToken: nextPageToken(offset, pageSize, hasNextPage)}, http.StatusOK)
 	}
 }

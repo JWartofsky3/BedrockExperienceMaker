@@ -21,6 +21,9 @@ func ReorderExperiencePackAddons(db *sql.DB) http.HandlerFunc {
 			return
 		}
 		packID := r.PathValue("name")
+		if !authorizeCreator(w, r, db, packID) {
+			return
+		}
 		if _, err := packs.Get(r.Context(), db, packID, false); packs.NotFound(err) {
 			packs.WriteJSONError(w, "pack not found", http.StatusNotFound)
 			return
@@ -70,7 +73,9 @@ func ReorderExperiencePackAddons(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-func selectedIDs(ctx context.Context, queryer interface{ QueryContext(context.Context, string, ...any) (*sql.Rows, error) }, packID string) []string {
+func selectedIDs(ctx context.Context, queryer interface {
+	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
+}, packID string) []string {
 	rows, err := queryer.QueryContext(ctx, `SELECT addon_id FROM experience_pack_addons WHERE experience_pack_id = ? ORDER BY install_order`, packID)
 	if err != nil {
 		return nil

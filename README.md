@@ -56,7 +56,7 @@ A possible later capability is to download the selected add-ons and build a sing
 
 The MVP schema is in [database/schema.sql](database/schema.sql), with brief relationship notes in [database/README.md](database/README.md). It is designed for MySQL 8.0+ and creates only a local `bedrock_experience_maker` database when imported.
 
-It has four tables: a manually curated `addons` catalog, `addon_dependencies`, `experience_packs`, and the ordered join table `experience_pack_addons`. Packs use a local `creator_name` field for display; it is not authentication or authorization. Source URLs, a current version, a Bedrock-version note, and raw manifest data are optional add-on metadata; no versions, manifest data, or compatibility records are required to browse add-ons or build a pack. Add-on IDs are stable, application-owned resource identifiers used directly in `addons/{id}`; they do not need to be UUIDs.
+It has a manually curated `addons` catalog, dependencies, experience packs with their ordered add-ons, plus local `users` and `sessions`. Packs display a creator name and are editable only by the signed-in creator. Source URLs, a current version, a Bedrock-version note, and raw manifest data are optional add-on metadata; no versions, manifest data, or compatibility records are required to browse add-ons or build a pack. Add-on IDs are stable, application-owned resource identifiers used directly in `addons/{id}`; they do not need to be UUIDs.
 
 Creator-defined manifest UUIDs can be retained in raw manifest data but are never used to identify catalog records or enforce uniqueness.
 
@@ -69,9 +69,11 @@ Minecraft version tags and manifest minimum-engine versions are optional notes. 
 ## Run the add-on catalog
 
 1. Configure the local MySQL Windows service as `MySQL`.
-2. Run `npm run seed` from the repository root. It prompts for the local MySQL root password, then applies the schema, seed catalog, example experience, and local API account.
+2. Run `npm run seed` from the repository root. It prompts for the local MySQL root password, then applies the schema, seed catalog, example experience, and local API account. It resets the add-ons in the seeded example pack to its documented order.
 3. Run `npm run backend` from the repository root.
-4. Run `npm run dev` from the repository root and open the URL Vite prints, normally `http://localhost:5173`.
+4. Run `npm run dev` from the repository root and open the URL Vite prints, normally `http://localhost:5173`. Use the seeded local creator account to sign in before creating or editing packs.
+
+Anyone can browse an experience and use **Download JSON** to save its pack data, including the full JSON records for every installed add-on. Only the signed-in creator can change or delete a pack.
 
 The Vite dev server proxies `GET /v1/addons` to the API at `http://127.0.0.1:8080`. The add-on page renders only the records returned by MySQL and shows an error if the API is unavailable.
 

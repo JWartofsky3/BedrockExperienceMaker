@@ -15,12 +15,13 @@ import (
 const addonColumns = `a.id, a.display_name, a.creator_name, a.description, a.icon_path, a.curseforge_url, a.mcpedl_url, a.current_version, a.minecraft_version_note, a.manifest_data`
 
 type ExperiencePack struct {
-	Name        string      `json:"name"`
-	DisplayName string      `json:"displayName"`
-	CreatorName string      `json:"creatorName"`
-	Description string      `json:"description,omitempty"`
-	SetupNotes  string      `json:"setupNotes,omitempty"`
-	Addons      []PackAddon `json:"addons,omitempty"`
+	Name          string      `json:"name"`
+	DisplayName   string      `json:"displayName"`
+	CreatorName   string      `json:"creatorName"`
+	CreatorUserID string      `json:"creatorUserId,omitempty"`
+	Description   string      `json:"description,omitempty"`
+	SetupNotes    string      `json:"setupNotes,omitempty"`
+	Addons        []PackAddon `json:"addons,omitempty"`
 }
 
 type PackAddon struct {
@@ -30,15 +31,16 @@ type PackAddon struct {
 }
 
 func Get(ctx context.Context, db *sql.DB, id string, includeAddons bool) (ExperiencePack, error) {
-	row := db.QueryRowContext(ctx, `SELECT id, name, creator_name, description, setup_notes FROM experience_packs WHERE id = ?`, id)
+	row := db.QueryRowContext(ctx, `SELECT p.id, p.name, COALESCE(u.username, p.creator_name), p.creator_user_id, p.description, p.setup_notes FROM experience_packs p LEFT JOIN users u ON u.id = p.creator_user_id WHERE p.id = ?`, id)
 	var pack ExperiencePack
 	var storedID string
-	var creator, description, setupNotes sql.NullString
-	if err := row.Scan(&storedID, &pack.DisplayName, &creator, &description, &setupNotes); err != nil {
+	var creator, creatorUserID, description, setupNotes sql.NullString
+	if err := row.Scan(&storedID, &pack.DisplayName, &creator, &creatorUserID, &description, &setupNotes); err != nil {
 		return ExperiencePack{}, err
 	}
 	pack.Name = "packs/" + storedID
 	pack.CreatorName = creator.String
+	pack.CreatorUserID = creatorUserID.String
 	pack.Description = description.String
 	pack.SetupNotes = setupNotes.String
 	if includeAddons {
@@ -49,6 +51,14 @@ func Get(ctx context.Context, db *sql.DB, id string, includeAddons bool) (Experi
 		pack.Addons = items
 	}
 	return pack, nil
+}
+
+func IsCreator(ctx context.Context, db *sql.DB, packID, userID string) (bool, error) {
+	var creatorUserID sql.NullString
+	if err := db.QueryRowContext(ctx, `SELECT creator_user_id FROM experience_packs WHERE id = ?`, packID).Scan(&creatorUserID); err != nil {
+		return false, err
+	}
+	return creatorUserID.Valid && creatorUserID.String == userID, nil
 }
 
 func ListAddons(ctx context.Context, db *sql.DB, packID string) ([]PackAddon, error) {
@@ -77,6 +87,9 @@ func ListAddons(ctx context.Context, db *sql.DB, packID string) ([]PackAddon, er
 		item.Addon.MinecraftVersionNote = minecraftNote.String
 		item.Addon.ManifestData = manifestData
 		item.Note = note.String
+		if err := addons.PopulateDependencies(ctx, db, &item.Addon); err != nil {
+			return nil, err
+		}
 		items = append(items, item)
 	}
 	return items, rows.Err()

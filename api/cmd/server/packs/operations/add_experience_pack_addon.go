@@ -26,6 +26,9 @@ func AddExperiencePackAddon(db *sql.DB) http.HandlerFunc {
 			return
 		}
 		packID := r.PathValue("name")
+		if !authorizeCreator(w, r, db, packID) {
+			return
+		}
 		if _, err := packs.Get(r.Context(), db, packID, false); packs.NotFound(err) {
 			packs.WriteJSONError(w, "pack not found", http.StatusNotFound)
 			return
