@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package bedrock.experience.v1;
+
+option go_package = "github.com/JWartofsky3/BedrockExperienceMaker/api/gen/go/bedrock/experience/v1;experiencev1";
+
+import "bedrock/experience/v1/resources.proto";
+import "google/api/annotations.proto";
+import "google/api/client.proto";
+import "google/api/field_behavior.proto";
+import "google/api/resource.proto";
+import "google/protobuf/empty.proto";
+
+service AddonService {
+  rpc ListAddons(ListAddonsRequest) returns (ListAddonsResponse) {
+    option (google.api.http) = {get: "/v1/addons"};
+    option (google.api.method_signature) = "";
+  }
+
+  rpc GetAddon(GetAddonRequest) returns (Addon) {
+    option (google.api.http) = {get: "/v1/{name=addons/*}"};
+    option (google.api.method_signature) = "name";
+  }
+
+  rpc DeleteAddon(DeleteAddonRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {delete: "/v1/{name=addons/*}"};
+    option (google.api.method_signature) = "name";
+  }
+}
+
+message ListAddonsRequest {
+  // The maximum number of add-ons to return. The server returns at most 100.
+  // If unspecified, at most 50 add-ons are returned.
+  int32 page_size = 1;
+
+  // A page token received from a previous ListAddons call.
+  string page_token = 2;
+}
+
+message ListAddonsResponse {
+  // The add-ons in the catalog.
+  repeated Addon addons = 1;
+
+  // A token to retrieve the next page, if one exists.
+  string next_page_token = 2;
+}
+
+message GetAddonRequest {
+  // The name of the add-on to retrieve. Format: addons/{addon}.
+  string name = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "bedrockexperiencemaker.local/Addon"}
+  ];
+}
+
+message DeleteAddonRequest {
+  // The name of the add-on to delete. Format: addons/{addon}.
+  string name = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {type: "bedrockexperiencemaker.local/Addon"}
+  ];
+}

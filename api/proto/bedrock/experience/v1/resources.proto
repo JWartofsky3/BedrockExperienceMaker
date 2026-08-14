@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package bedrock.experience.v1;
+
+option go_package = "github.com/JWartofsky3/BedrockExperienceMaker/api/gen/go/bedrock/experience/v1;experiencev1";
+
+import "google/api/field_behavior.proto";
+import "google/api/resource.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+message Addon {
+  option (google.api.resource) = {
+    type: "bedrockexperiencemaker.local/Addon"
+    pattern: "addons/{addon}"
+  };
+
+  string name = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+  string display_name = 2 [(google.api.field_behavior) = REQUIRED];
+  string creator_name = 3;
+  string description = 4;
+  string icon_path = 5;
+  string curseforge_url = 6;
+  string mcpedl_url = 7;
+  string current_version = 8;
+  string minecraft_version_note = 9;
+  google.protobuf.Struct manifest_data = 10;
+  google.protobuf.Timestamp create_time = 11 [(google.api.field_behavior) = OUTPUT_ONLY];
+  google.protobuf.Timestamp update_time = 12 [(google.api.field_behavior) = OUTPUT_ONLY];
+}

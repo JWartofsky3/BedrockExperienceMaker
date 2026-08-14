@@ -4,14 +4,18 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "backend": "go -C api run ./cmd/server",
+    "db:start": "powershell.exe -NoProfile -Command \"if ((Get-Service -Name MySQL).Status -ne 'Running') { Start-Service -Name MySQL }\"",
     "dev": "vite",
+    "full": "npm run db:start && start \"Bedrock API\" powershell.exe -NoExit -NoProfile -Command \"Set-Location '%CD%'; $env:MYSQL_DSN = 'bedrock_app:change-me@tcp(127.0.0.1:3306)/bedrock_experience_maker?parseTime=true'; npm.cmd run backend\" && npm run dev",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
