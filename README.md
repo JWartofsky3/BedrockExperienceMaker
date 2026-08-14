@@ -59,3 +59,9 @@ The initial schema is in [database/schema.sql](database/schema.sql), with relati
 The three inspected `.mcaddon` files demonstrate why the catalog separates an **add-on release** from its contained **manifest packs**. Each archive contains resource and behavior packs, and the behavior packs declare dependencies on resource-pack UUIDs and built-in script modules. Auto Miner also has an archive label of `1.0.2` while its behavior-pack header is `1.0.1`.
 
 All primary keys are application-generated UUIDs owned by this application. Manifest header UUIDs and module UUIDs are stored as indexed metadata, never as unique keys: they are useful for dependency matching but cannot be trusted as globally unique creator identifiers. Manifest JSON is retained alongside normalized modules, dependencies, capabilities, and an optional file inventory so the model remains forward-compatible and can later support conflict detection.
+
+### Availability and Bedrock-version policy
+
+The catalog treats provider availability as a current observation, not a promise that every historical release can still be downloaded. A creator may expose only the latest artifact; therefore an unavailable historical source remains in a published plan for context, but must display an availability warning and offer the current project page where possible.
+
+Minecraft version tags, manifest minimum-engine versions, and testing reports are compatibility evidence—not hard validation rules. Since players normally install the current Bedrock release, a mismatch should be surfaced with its source and severity, while still allowing the creator to include the add-on. Experience-pack revisions may record an intended Bedrock version so the app can produce useful warnings.

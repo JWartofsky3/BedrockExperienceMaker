@@ -82,6 +82,7 @@ CREATE TABLE addon_releases (
   version_label VARCHAR(100) NOT NULL,
   release_notes TEXT NULL,
   published_at DATETIME NULL,
+  release_status ENUM('current', 'historical', 'unknown') NOT NULL DEFAULT 'current',
   is_recommended BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -103,6 +104,8 @@ CREATE TABLE addon_release_sources (
   archive_filename VARCHAR(512) NULL,
   archive_size_bytes BIGINT UNSIGNED NULL,
   archive_sha256 BINARY(32) NULL,
+  availability_status ENUM('available', 'project_page_only', 'unavailable', 'unknown') NOT NULL DEFAULT 'unknown',
+  availability_checked_at DATETIME NULL,
   inspected_at DATETIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -222,6 +225,23 @@ CREATE TABLE addon_release_experiments (
   CONSTRAINT fk_release_experiments_experiment FOREIGN KEY (experiment_id) REFERENCES experiments (id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- Compatibility is advisory. Version tags and manifest requirements are evidence,
+-- not a hard install block, because Bedrock players normally use the current game build.
+CREATE TABLE addon_release_compatibility_evidence (
+  id CHAR(36) NOT NULL,
+  addon_release_id CHAR(36) NOT NULL,
+  minecraft_version VARCHAR(100) NOT NULL,
+  evidence_type ENUM('manifest_minimum', 'provider_tag', 'creator_claim', 'curator_test', 'user_report') NOT NULL,
+  assessment ENUM('unknown', 'likely_compatible', 'verified_compatible', 'warning', 'reported_incompatible') NOT NULL DEFAULT 'unknown',
+  note TEXT NULL,
+  observed_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY ix_release_compatibility_release (addon_release_id),
+  KEY ix_release_compatibility_version (minecraft_version),
+  CONSTRAINT fk_release_compatibility_release FOREIGN KEY (addon_release_id) REFERENCES addon_releases (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE release_compatibility_rules (
   id CHAR(36) NOT NULL,
   left_addon_release_id CHAR(36) NOT NULL,
@@ -256,6 +276,7 @@ CREATE TABLE experience_pack_revisions (
   description TEXT NULL,
   icon_path VARCHAR(1024) NULL,
   setup_notes TEXT NULL,
+  target_bedrock_version VARCHAR(100) NULL,
   status ENUM('draft', 'published', 'archived') NOT NULL DEFAULT 'draft',
   published_at DATETIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
