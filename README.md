@@ -60,6 +60,10 @@ It has three tables: a manually curated `addons` catalog, `experience_packs`, an
 
 All primary keys are application-generated UUIDs. Creator-defined manifest UUIDs can be retained in raw manifest data but are never used to identify catalog records or enforce uniqueness.
 
+## API design
+
+The resource-oriented local API contract is documented in [api/README.md](api/README.md). It uses application-owned resource names for add-ons, experience packs, and their ordered add-on memberships.
+
 ### Availability and Bedrock-version policy
 
 The catalog assumes a provider may expose only the newest artifact. It records an optional current version and always links to the provider page; historical-release tracking can be added later if it becomes useful.
